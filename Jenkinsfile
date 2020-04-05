@@ -1,4 +1,8 @@
 pipeline {
+  environment {
+    registry = "gustavoapolinario/docker-test"
+    registryCredential = 'dockerhub'
+  }
   agent any
   stages {
     stage('checkout project') {
@@ -6,11 +10,22 @@ pipeline {
         checkout scm
       }
     }
-    stage('test') {
-      steps {
-        sh 'docker-compose run test'
+	stage('Building image') {
+      steps{
+        script {
+          docker.build registry + ":$BUILD_NUMBER"
+        }
       }
     }
+    stage('Deploy Image') {
+	  steps{    
+		script {
+			docker.withRegistry( '', registryCredential ) {
+			dockerImage.push()
+		}
+	  }
+    }
+  }
     stage('report') {
       parallel {
         stage('report') {
@@ -37,9 +52,7 @@ pipeline {
     }
     stage('deploy') {
       steps {
-        sh '''make build-docker-prod-image
-make deploy-production-ssh
-'''
+        sh '''make build-docker-prod-image make deploy-production-ssh '''
       }
     }
   }
