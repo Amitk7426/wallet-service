@@ -3,7 +3,7 @@ pipeline {
     registry = "gustavoapolinario/docker-test"
     registryCredential = 'dockerhub'
   }
-  agent any
+  agent { label 'docker' }
   stages {
     stage('Maven Install') {
       agent {
