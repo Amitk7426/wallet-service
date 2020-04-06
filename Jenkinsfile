@@ -5,14 +5,22 @@ pipeline {
   }
   agent any
   stages {
-    stage('Maven Install') {
-      agent {
-        docker {
-          image 'maven:3.5.0'
+    stage('Build') {
+      steps {
+        container('maven') {
+          sh """
+                        mvn package -DskipTests
+                                                """
         }
       }
+    }
+    stage('Test') {
       steps {
-        sh 'mvn clean install'
+        container('maven') {
+          sh """
+             mvn test
+          """
+        }
       }
     }
     
